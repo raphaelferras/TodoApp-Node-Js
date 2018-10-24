@@ -1,16 +1,21 @@
 const expect = require('expect');
 const request = require('supertest');
+const {ObjectID} = require('mongodb');
 
 const {app} = require('./../server');
 const {Todo} = require('./../models/todo');
 
 var todos = [{
+    _id: new ObjectID(),
     text: 'first test todo'
 },{
+  _id: new ObjectID(),
   text: 'second test todo'
 },{
+  _id: new ObjectID(),
   text: 'third test todo'
 },{
+  _id: new ObjectID(),
   text: 'fourth test todo'
 }]
 
@@ -72,4 +77,29 @@ describe('GET /todos', () => {
         expect(res.body.todos.length).toBe(4);
       }).end(done);
   })
+});
+
+describe('GET /todos/:id', () => {
+  it('should get a single todo', (done) => {
+    request(app)
+      .get(`/todos/${todos[0]._id.toHexString()}`)
+      .expect(200)
+      .expect((res) => {
+        expect(res.body.todo.text).toBe(todos[0].text);
+      }).end(done);
+  });
+
+  it('should not find', (done) => {
+    request(app)
+    .get(`/todos/${(new ObjectID()).toHexString()}`)
+      .expect(404)
+      .end(done);
+  });
+
+  it('should be a invalid id', (done) => {
+    request(app)
+    .get(`/todos/123`)
+      .expect(404)
+      .end(done);
+  });
 });
