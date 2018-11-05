@@ -5,9 +5,10 @@ const {ObjectID} = require('mongodb');
 const express = require('express');
 const bodyParser = require('body-parser');
 
-var {mongoose} = require('./db/mongoose.js');
-var {Todo} = require('./models/todo.js');
-var {User} = require('./models/user.js');
+var {mongoose} = require('./db/mongoose');
+var {Todo} = require('./models/todo');
+var {User} = require('./models/user');
+var {authenticate} = require('./middleware/authenticate.js');
 
 var app = express();
 
@@ -103,11 +104,7 @@ app.patch('/todos/:id', (req, res) => {
   });
 });
 
-app.listen(PORT, () => {
-  console.log(`Started on port ${PORT}`);
-});
 
-module.exports = {app};
 
 app.post('/users', (req, res) => {
   var user = new User(_.pick(req.body, ['email','password','tokens.access','tokens.token']));
@@ -123,7 +120,16 @@ app.post('/users', (req, res) => {
   });
 });
 
+app.get('/users/me',authenticate, (req, res) => {
+  res.send(req.user);
+})
 
+
+app.listen(PORT, () => {
+  console.log(`Started on port ${PORT}`);
+});
+
+module.exports = {app};
 
 
 // var newUser = new User({
