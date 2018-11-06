@@ -67,6 +67,22 @@ UserSchema.statics.findByToken = function (token) {
   });
 };
 
+UserSchema.statics.findByCredentials = function (email, password) {
+  var User = this;
+  var hashPassword = SHA256(JSON.stringify(password) + 'saltingthispasswordtomakeitmoresecure_by_raphael').toString();
+  return User.findOne({email}).then((user) => {
+    if (!user){
+      return Promise.reject();
+    }
+    return new Promise((resolve, reject) => {
+      if(user.password === hashPassword){
+        resolve(user);
+      }
+      reject();
+    });
+  })
+};
+
 UserSchema.pre('save', function (next) {
   var user = this;
 
